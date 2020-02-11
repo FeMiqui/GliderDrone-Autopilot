@@ -13,16 +13,19 @@ int validateChecksum(NmeaSentence* s) {
   // validate input
   if(s) {
     int i;
-    checksum = 0;
-    
+    checksum = 'G' ^ 'P';
+
     for(i = 0; i < NMEA_DATATYPE_LEN; i++) {
       checksum ^= s->datatype[i];
     }
 
-    for(i = 0; i < NMEA_DATA_LEN; i++) {
-      checksum ^= s->data[i];
+    checksum ^= ',';
+
+    for(i = 0; i < s->data_len; i++) {
+       checksum ^= s->data[i];
     }
-    checksum -= s->checksum;
+
+    checksum ^= s->checksum;
   }
   
   return checksum;
@@ -47,12 +50,6 @@ void createChecksum(NmeaSentence* s) {
   }
 }
 
-void parseGgaData(GgaData* d, const char* data) {
-  if(d) {
-
-  }
-}
-
 NmeaSentence* createNmeaSentence(const char* datatype, const char* data) {
   // validate input
   if(!datatype || !data) {
@@ -74,10 +71,23 @@ NmeaSentence* createNmeaSentence(const char* datatype, const char* data) {
 
 NmeaSentence* parseNmeaSentence(const char* buffer, int len) {
   // validate input
-  if(!buffer || len <= 0) {
+  if(!buffer || len <= 0 || len > 82 || buffer[0] != '$' 
+                  || buffer[1] != 'G' || buffer[2] != 'P' 
+                  || buffer[len - 2] != 0x0d || buffer[len - 1] != 0x0a) {
     return NULL;
   }
-  return NULL;
+
+  NmeaSentence* s = (NmeaSentence*) malloc(sizeof(NmeaSentence));
+
+  if(!s) {
+    return NULL;
+  }
+
+  strncpy(s->datatype, buffer + 3, NMEA_DATATYPE_LEN);
+  strncpy(s->data, buffer + NMEA_DATATYPE_LEN + 4, len - NMEA_DATATYPE_LEN - 9);
+  s->data_len = strlen(s->data);
+  s->checksum = (char) strtol(buffer + len - 4, NULL, 16);
+  return s;
 }
 
 GgaData* readGgaData(NmeaSentence* s) {
@@ -86,7 +96,7 @@ GgaData* readGgaData(NmeaSentence* s) {
     return NULL;
   }
 
-  GgaData* d = malloc(sizeof(GgaData));
+  GgaData* d = (GgaData*) malloc(sizeof(GgaData));
 
   if(!d) {
     return NULL;
@@ -94,7 +104,7 @@ GgaData* readGgaData(NmeaSentence* s) {
 
   char* pos = s->data;
   int num_field = 0;
-  int fix;
+  int fix = 0;
 
   for (int i = 0; i < s->data_len; i++) {
     if(s->data[i] == ',') {
