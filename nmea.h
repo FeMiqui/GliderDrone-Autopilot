@@ -35,4 +35,4 @@ GgaData* readGgaData(NmeaSentence* s);
 /*
  * Frees the NMEA sentence and associated information.
  */
-void freeNmeaSentence(NmeaSentence s);
+void freeNmeaSentence(NmeaSentence* s);
