@@ -1,7 +1,7 @@
 #define GGA_DATATYPE 0
 
 typedef struct s_NmeaSentence {
-  int checksum;
+  char checksum;
   char datatype;
   char msg[73];
 } NmeaSentence;
