@@ -8,18 +8,23 @@
  * Returns 0 if the checksum is correct.
  */
 int validateChecksum(NmeaSentence* s) {
-  char checksum = 0;
-  int i;
-  if(s) { 
+  char checksum = -1;
+ 
+  // validate input
+  if(s) {
+    int i;
+    checksum = 0;
+    
     for(i = 0; i < NMEA_DATATYPE_LEN; i++) {
       checksum ^= s->datatype[i];
     }
 
-    for(i = 0; i < NMEA_MSG_LEN; i++) {
-      checksum ^= s->msg[i];
+    for(i = 0; i < NMEA_DATA_LEN; i++) {
+      checksum ^= s->data[i];
     }
     checksum -= s->checksum;
   }
+  
   return checksum;
 }
 
@@ -27,23 +32,30 @@ int validateChecksum(NmeaSentence* s) {
  * Helper function for creating checksums.
  */
 void createChecksum(NmeaSentence* s) {
-  int i;
-
+  // validate input
   if(s) {
+    int i;
     s->checksum = 0;
   
     for(i = 0; i < NMEA_DATATYPE_LEN; i++) {
       s->checksum ^= s->datatype[i];
     }
 
-    for(i = 0; i < NMEA_MSG_LEN; i++) {
-      s->checksum ^= s->msg[i];
+    for(i = 0; i < NMEA_DATA_LEN; i++) {
+      s->checksum ^= s->data[i];
     }
   }
 }
 
-NmeaSentence* creaeNmeaSentence(char* datatype, char* msg) {
-  if(!datatype || !msg) {
+void parseGgaData(GgaData* d, const char* data) {
+  if(d) {
+
+  }
+}
+
+NmeaSentence* createNmeaSentence(const char* datatype, const char* data) {
+  // validate input
+  if(!datatype || !data) {
     return NULL;
   }
 
@@ -54,17 +66,70 @@ NmeaSentence* creaeNmeaSentence(char* datatype, char* msg) {
   }
 
   strncpy(s->datatype, datatype, NMEA_DATATYPE_LEN);
-  strncpy(s->msg, msg, NMEA_MSG_LEN);
+  strncpy(s->data, data, NMEA_DATA_LEN);
+  s->data_len = strlen(s->data); 
   createChecksum(s);
   return s;
 }
 
-NmeaSentence* parseNmeaSentence(char* buffer, int len) {
+NmeaSentence* parseNmeaSentence(const char* buffer, int len) {
+  // validate input
+  if(!buffer || len <= 0) {
+    return NULL;
+  }
   return NULL;
 }
 
 GgaData* readGgaData(NmeaSentence* s) {
-  return NULL;
+  // validate input
+  if(!s || strcmp(s->datatype, GGA_DATATYPE_STR) || validateChecksum(s)) {
+    return NULL;
+  }
+
+  GgaData* d = malloc(sizeof(GgaData));
+
+  if(!d) {
+    return NULL;
+  }
+
+  char* pos = s->data;
+  int num_field = 0;
+  int fix;
+
+  for (int i = 0; i < s->data_len; i++) {
+    if(s->data[i] == ',') {
+      switch(num_field) {
+        case 1: // latitude value field
+          d->latitude = atof(pos);
+          break;
+        case 2: // latitude N/S field
+          d->latitude = (*pos == 'S') ? -(d->latitude) : d->latitude;
+          break;
+        case 3: // longitude value field
+          d->longitude = atof(pos);
+          break;
+        case 4: // longitude E/W field
+          d->longitude = (*pos == 'W') ? -(d->longitude) : d->longitude;
+          break;
+        case 5: // fix quality field
+          fix = atoi(pos);
+          break;
+        case 8: // altitude field
+          d->altitude = atof(pos);
+          break;
+      }
+
+      pos = s->data + i + 1;
+      num_field++;
+    }
+  }
+
+  if(!fix) { // this data is invalid
+    free(d);
+    d = NULL;
+  }
+
+  return d;
 }
 
 void freeNmeaSentence(NmeaSentence* s) {
