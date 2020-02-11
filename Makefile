@@ -1,6 +1,7 @@
 CC = gcc
 CFLAGS = -Wall
 TARGET = autopilot
+SRCS = nmea.c gps.c $(TARGET).c
 
 debug: CFLAGS += -g -O0
 debug: $(TARGET)
@@ -10,7 +11,7 @@ release: $(TARGET)
 
 all: $(TARGET)
 
-$(TARGET): $(TARGET).c
+$(TARGET): $(SRCS)
 	$(CC) $(CFLAGS) $^ -o $@
 
 clean:
