@@ -13,27 +13,25 @@ typedef struct s_GgaData {
   double latitude;
   double longitude;
   double altitude;
+  char hour;
+  char min;
+  char sec;
 } GgaData;
 
 /*
  * Creates an NMEA sentence with the given information.
- * Returns NULL on any error.
+ * Returns 0 on success.
  */
-NmeaSentence* createNmeaSentence(const char* datatype, const char* data);
+int createNmeaSentence(const char* datatype, const char* data, NmeaSentence* s);
 
 /*
  * Parses the given buffer into an NMEA sentence.
- * Returns NULL on any error.
+ * Returns 0 on success.
  */
-NmeaSentence* parseNmeaSentence(const char* buffer, int len);
+int parseNmeaSentence(const char* buffer, int len, NmeaSentence* s);
 
 /*
  * Populates the GgaData struct with information from the NMEA sentence.
- * Returns NULL on any error.
+ * Returns 0 on success.
  */
-GgaData* readGgaData(NmeaSentence* s);
-
-/*
- * Frees the NMEA sentence and associated information.
- */
-void freeNmeaSentence(NmeaSentence* s);
+int readGgaData(NmeaSentence* s, GgaData* d);
