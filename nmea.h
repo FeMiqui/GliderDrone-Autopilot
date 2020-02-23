@@ -10,12 +10,15 @@ typedef struct s_NmeaSentence {
 } NmeaSentence;
 
 typedef struct s_GgaData {
-  double latitude;
-  double longitude;
   double altitude;
-  char hour;
-  char min;
-  char sec;
+  double min_longitude;   // longitude minutes
+  double min_latitude;    // latitude minutes
+  short deg_longitude;    // longitude degrees
+  short deg_latitude;     // latitude degrees
+  short msec;             // milliseconds
+  char hour;              // hour
+  char min;               // minutes
+  char sec;               // sec
 } GgaData;
 
 /*

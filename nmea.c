@@ -1,5 +1,6 @@
 #include <string.h>
 #include <stdlib.h>
+#include <stdio.h>
 
 #include "nmea.h"
 
@@ -80,57 +81,27 @@ int parseNmeaSentence(const char* buffer, int len, NmeaSentence* s) {
 
 int readGgaData(NmeaSentence* s, GgaData* d) {
   // validate input
-  if(!s || !d || strcmp(s->datatype, GGA_DATATYPE_STR) || validateChecksum(s)) {
+  if(!s || !d || strcmp(s->datatype, GGA_DATATYPE_STR) || !validateChecksum(s)) {
     return 1;
   }
+  
+  char ns; // north/south indicator
+  char ew; // east/west indicator
+  int fix = 0; // fix quality
 
-  char* pos = s->data;
-  int num_field = 0;
-  int fix = 0;
+  int temp = sscanf(s->data, 
+         "%2hhd%2hhd%2hhd.%3hd,%2hd%7lf,%c,%3hd%7lf,%c,%1d,%*2d,%*4f,%4lf", 
+         &d->hour, &d->min, &d->sec, &d->msec, 
+         &d->deg_latitude, &d->min_latitude, &ns,
+         &d->deg_longitude, &d->min_longitude, &ew,
+         &fix, &d->altitude);
 
-  for (int i = 0; i < s->data_len; i++) {
-    if(s->data[i] == ',') {
-      switch(num_field) {
-        case 0: { // time field
-          int time = atoi(pos);
-          d->sec = time % 100;
-          d->min = (time / 100) % 100;
-          d->hour = time / 10000;
-          break;
-        }
-        case 1: { // latitude value field
-          d->latitude = atof(pos);
-          break;
-        }
-        case 2: { // latitude N/S field 
-          if(*pos == 'S') {
-            d->latitude = -d->latitude;
-          }
-          break;
-        }
-        case 3: { // longitude value field
-          d->longitude = atof(pos);
-          break;
-        }
-        case 4: { // longitude E/W field
-          if(*pos == 'W') {
-            d->longitude = -d->longitude;
-          }
-          break;
-        }
-        case 5: { // fix quality field
-          fix = atoi(pos);
-          break;
-        }
-        case 8: { // altitude field
-          d->altitude = atof(pos);
-          break;
-        }
-      }
+  if(ns == 'S') {
+    d->deg_latitude = -(d->deg_latitude);
+  }
 
-      pos = s->data + i + 1;
-      num_field++;
-    }
+  if(ew == 'W') {
+    d->deg_longitude = -(d->deg_longitude);
   }
 
   if(!fix) { // this data is invalid
@@ -139,4 +110,3 @@ int readGgaData(NmeaSentence* s, GgaData* d) {
 
   return 0;
 }
-
