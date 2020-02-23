@@ -81,7 +81,7 @@ int parseNmeaSentence(const char* buffer, int len, NmeaSentence* s) {
 
 int readGgaData(NmeaSentence* s, GgaData* d) {
   // validate input
-  if(!s || !d || strcmp(s->datatype, GGA_DATATYPE_STR) || !validateChecksum(s)) {
+  if(!s || !d || strcmp(s->datatype, GGA_DATATYPE_STR) || validateChecksum(s)) {
     return 1;
   }
   
