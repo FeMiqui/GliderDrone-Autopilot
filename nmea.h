@@ -14,11 +14,11 @@ typedef struct s_GgaData {
   double min_longitude;   // longitude minutes
   double min_latitude;    // latitude minutes
   short deg_longitude;    // longitude degrees
-  short deg_latitude;     // latitude degrees
   short msec;             // milliseconds
+  char deg_latitude;      // latitude degrees
   char hour;              // hour
   char min;               // minutes
-  char sec;               // sec
+  char sec;               // seconds
 } GgaData;
 
 /*

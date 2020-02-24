@@ -71,11 +71,18 @@ int parseNmeaSentence(const char* buffer, int len, NmeaSentence* s) {
                   || buffer[len - 2] != 0x0d || buffer[len - 1] != 0x0a) {
     return 1;
   }
-
+  
+  // copy datatype
   strncpy(s->datatype, buffer + 3, NMEA_DATATYPE_LEN);
+  
+  // copy data
+  memset(s->data, 0, NMEA_DATA_LEN);
   strncpy(s->data, buffer + NMEA_DATATYPE_LEN + 4, len - NMEA_DATATYPE_LEN - 9);
   s->data_len = strlen(s->data);
+
+  // copy checksum
   s->checksum = (char) strtol(buffer + len - 4, NULL, 16);
+  
   return 0;
 }
 
@@ -90,7 +97,7 @@ int readGgaData(NmeaSentence* s, GgaData* d) {
   int fix = 0; // fix quality
 
   int temp = sscanf(s->data, 
-         "%2hhd%2hhd%2hhd.%3hd,%2hd%7lf,%c,%3hd%7lf,%c,%1d,%*2d,%*4f,%4lf", 
+         "%2hhd%2hhd%2hhd.%3hd,%2hhd%7lf,%c,%3hd%7lf,%c,%1d,%*2d,%*4f,%4lf", 
          &d->hour, &d->min, &d->sec, &d->msec, 
          &d->deg_latitude, &d->min_latitude, &ns,
          &d->deg_longitude, &d->min_longitude, &ew,
