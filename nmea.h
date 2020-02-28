@@ -19,14 +19,22 @@ typedef struct s_Latitude {
   char deg;
 } Latitude;
 
+typedef struct s_Coord {
+  Latitude lat;
+  Longitude lon;
+} Coord;
+
+typedef struct s_Time {
+  short msec;
+  char hour;
+  char min;
+  char sec;
+} Time;
+
 typedef struct s_GgaData {
   double altitude;
-  Longitude longitude;
-  Latitude latitude;      
-  short msec;             // milliseconds
-  char hour;              // hour
-  char min;               // minutes
-  char sec;               // seconds
+  Coord coord;
+  Time time;
 } GgaData;
 
 /*

@@ -98,17 +98,17 @@ int readGgaData(NmeaSentence* s, GgaData* d) {
 
   int temp = sscanf(s->data, 
          "%2hhd%2hhd%2hhd.%3hd,%2hhd%7lf,%c,%3hd%7lf,%c,%1d,%*2d,%*4f,%4lf", 
-         &d->hour, &d->min, &d->sec, &d->msec, 
-         &d->latitude.deg, &d->latitude.min, &ns,
-         &d->longitude.deg, &d->longitude.min, &ew,
+         &d->time.hour, &d->time.min, &d->time.sec, &d->time.msec, 
+         &d->coord.lat.deg, &d->coord.lat.min, &ns,
+         &d->coord.lon.deg, &d->coord.lon.min, &ew,
          &fix, &d->altitude);
 
   if(ns == 'S') {
-    d->latitude.deg = -(d->latitude.deg);
+    d->coord.lat.deg = -(d->coord.lat.deg);
   }
 
   if(ew == 'W') {
-    d->longitude.deg = -(d->longitude.deg);
+    d->coord.lon.deg = -(d->coord.lon.deg);
   }
 
   if(temp != 12 || !fix) { // this data is invalid
