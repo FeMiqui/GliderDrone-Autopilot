@@ -1,9 +1,6 @@
 #include <math.h>
 #include "distance.h"
 
-#include <stdlib.h>
-#include <stdio.h>
-
 static double degToRadians(double n) {
   return n * M_PI / 180;
 }
