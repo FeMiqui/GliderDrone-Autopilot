@@ -1,5 +1,6 @@
 CC = gcc
 CFLAGS = -Wall
+LIBS = -lm
 TARGET = autopilot
 SRCS := $(wildcard *.c)
 
@@ -13,7 +14,7 @@ release: $(TARGET)
 
 
 $(TARGET): $(SRCS)
-	$(CC) $(CFLAGS) $^ -o $@
+	$(CC) $(CFLAGS) $^ -o $@ $(LIBS)
 
 clean:
 	rm -f $(TARGET)

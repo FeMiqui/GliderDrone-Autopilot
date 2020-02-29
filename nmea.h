@@ -1,3 +1,5 @@
+#include "distance.h"
+
 #define NMEA_DATA_LEN 73
 #define NMEA_DATATYPE_LEN 3
 #define GGA_DATATYPE_STR "GGA"
@@ -9,20 +11,6 @@ typedef struct s_NmeaSentence {
   char data_len;
 } NmeaSentence;
 
-typedef struct s_Longitude {
-  double min;
-  short deg;
-} Longitude;
-
-typedef struct s_Latitude {
-  double min;
-  char deg;
-} Latitude;
-
-typedef struct s_Coord {
-  Latitude lat;
-  Longitude lon;
-} Coord;
 
 typedef struct s_Time {
   short msec;
@@ -32,8 +20,7 @@ typedef struct s_Time {
 } Time;
 
 typedef struct s_GgaData {
-  double altitude;
-  Coord coord;
+  Position pos;
   Time time;
 } GgaData;
 

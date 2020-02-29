@@ -1,3 +1,6 @@
+#ifndef NMEA_H
+#define NMEA_H
+
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -92,23 +95,30 @@ int readGgaData(NmeaSentence* s, GgaData* d) {
     return 1;
   }
   
-  char ns; // north/south indicator
-  char ew; // east/west indicator
-  int fix = 0; // fix quality
+  double  min_lon;  // minutes longitude
+  double  min_lat;  // minutes latitude
+  short   deg_lon;  // degrees longitude
+  char    deg_lat;  // degrees latitude
+  char    ns;       // north/south indicator
+  char    ew;       // east/west indicator
+  int     fix = 0;  // fix quality
 
   int temp = sscanf(s->data, 
          "%2hhd%2hhd%2hhd.%3hd,%2hhd%7lf,%c,%3hd%7lf,%c,%1d,%*2d,%*4f,%4lf", 
          &d->time.hour, &d->time.min, &d->time.sec, &d->time.msec, 
-         &d->coord.lat.deg, &d->coord.lat.min, &ns,
-         &d->coord.lon.deg, &d->coord.lon.min, &ew,
-         &fix, &d->altitude);
+         &deg_lat, &min_lat, &ns,
+         &deg_lon, &min_lon, &ew,
+         &fix, &d->pos.alt);
+
+  d->pos.coord.lat = simplifyDegrees(deg_lat, min_lat);
+  d->pos.coord.lon = simplifyDegrees(deg_lon, min_lon);
 
   if(ns == 'S') {
-    d->coord.lat.deg = -(d->coord.lat.deg);
+    d->pos.coord.lat = -(d->pos.coord.lat);
   }
 
   if(ew == 'W') {
-    d->coord.lon.deg = -(d->coord.lon.deg);
+    d->pos.coord.lon = -(d->pos.coord.lon);
   }
 
   if(temp != 12 || !fix) { // this data is invalid
@@ -117,3 +127,4 @@ int readGgaData(NmeaSentence* s, GgaData* d) {
 
   return 0;
 }
+#endif
