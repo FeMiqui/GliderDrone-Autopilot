@@ -1,5 +1,7 @@
 #ifndef NMEA_H
 #define NMEA_H
+#ifndef GPMRC_H //changed
+#define GPMRC_H //changed
 
 #include <string.h>
 #include <stdlib.h>
@@ -124,6 +126,27 @@ int readGgaData(NmeaSentence* s, GgaData* d) {
   if(temp != 12 || !fix) { // this data is invalid
      return 1;
   }
+
+  return 0;
+}
+
+int readRmcData(NmeaSentence* s, RmcData* d) {
+  // validate input
+  if(!s || !d || strcmp(s->datatype, GGA_DATATYPE_STR) || validateChecksum(s)) {
+    return 1;
+  }
+
+  double speed;    // speed in knots
+
+  int temp = sscanf(s->data, 
+         "%*2d%2*d%*2d.%*3hd,%c,%*2d%*7f,%*c,%*3d%*7f,%*c,%4lf,%6lf,%*2d,%*2d,%*2d,%*4f,%*c,%c", 
+         &d->status, &speed, &d->course, &d->mode);
+
+  if(status == "V") { // this data is invalid
+     return 1;
+  }
+  //meters per second = knots × 0.514444
+  d->speed = speed*0.514444;
 
   return 0;
 }
