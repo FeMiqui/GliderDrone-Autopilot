@@ -3,6 +3,7 @@
 #define NMEA_DATA_LEN 73
 #define NMEA_DATATYPE_LEN 3
 #define GGA_DATATYPE_STR "GGA"
+#define RMC_DATATYPE_STR "RMC" //changed
 
 typedef struct s_NmeaSentence {
   char checksum;
@@ -24,6 +25,13 @@ typedef struct s_GgaData {
   Time time;
 } GgaData;
 
+typedef struct s_RmcData { //changed
+  char status;
+  double speed;
+  double orientation;
+  char mode;
+} RmcData;
+
 /*
  * Creates an NMEA sentence with the given information.
  * Returns 0 on success.
@@ -41,3 +49,10 @@ int parseNmeaSentence(const char* buffer, int len, NmeaSentence* s);
  * Returns 0 on success.
  */
 int readGgaData(NmeaSentence* s, GgaData* d);
+
+/*
+ * Populates the RmcData struct with information from the NMEA sentence.
+ * Returns 0 on success.
+ */
+int readRmcData(NmeaSentence* s, RmcData* d); //changed
+
